@@ -15,7 +15,24 @@ public class GameLoop extends JFrame {
 
 	private JPanel contentPane;
 	
-	int framerate = 30;
+	int framerate = 60;
+	
+	int[][] mapMatrix = {
+			{1, 1, 1, 1, 1},
+			{1, 0, 1, 1, 1},
+			{1, 0, 1, 0, 1},
+			{1, 0, 0, 0, 1},
+			{1, 0, 1, 1, 1},
+			{1, 0, 1, 0, 1},
+			{1, 0, 0, 0, 1},
+			{1, 1, 1, 1, 1}
+	};
+	
+	int tileMargin = 5;
+	int tileSize = 50;
+	
+	int tileStartX = 100;
+	int tileStartY = 100;
 
 	/**
 	 * Launch the application.
@@ -34,10 +51,14 @@ public class GameLoop extends JFrame {
 	}
 	
 	public void paint(Graphics g) {
-		int rand_int_1 = (int)(Math.random()*500);
-		int rand_int_2 = (int)(Math.random()*500);
-		int rand_int_3 = (int)(Math.random()*50);
-		g.fillRect(rand_int_1, rand_int_2, rand_int_3, rand_int_3);
+		
+		for (int i=0; i<mapMatrix.length; i++) {
+			for (int j=0; j<mapMatrix[i].length; j++) {
+				if (mapMatrix[i][j]==1) {
+					g.fillRect(tileStartX + j*tileSize + j*tileMargin, tileStartY + i*tileSize + i*tileMargin, tileSize, tileSize);
+				}
+			}
+		}
 	}
 
 	/**
@@ -45,7 +66,7 @@ public class GameLoop extends JFrame {
 	 */
 	public GameLoop() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(0, 0, 800, 800);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -54,8 +75,6 @@ public class GameLoop extends JFrame {
 		final Timer t = new Timer(1000/framerate, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("joo");
-				
 				repaint();
 			}
 		});
