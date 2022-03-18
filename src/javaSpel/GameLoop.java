@@ -1,6 +1,7 @@
 package javaSpel;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -15,24 +16,33 @@ public class GameLoop extends JFrame {
 
 	private JPanel contentPane;
 	
-	int framerate = 60;
+	int framerate = 10;
 	
 	int[][] mapMatrix = {
 			{1, 1, 1, 1, 1},
 			{1, 0, 1, 1, 1},
 			{1, 0, 1, 0, 1},
 			{1, 0, 0, 0, 1},
-			{1, 1, 1, 1, 1},
+			{1, 0, 1, 1, 1},
 			{1, 0, 1, 0, 1},
 			{1, 0, 0, 0, 1},
 			{1, 1, 1, 1, 1}
 	};
 	
-	int tileMargin = 5;
+	int tileMargin = 0;
 	int tileSize = 50;
 	
 	int tileStartX = 100;
 	int tileStartY = 100;
+	
+	int playerX = 175;
+	int playerY = 175;
+	
+	int playerWidth = 20;
+	
+	double playerAngle = 45;
+	
+	int lineLength = 20;
 
 	/**
 	 * Launch the application.
@@ -52,6 +62,16 @@ public class GameLoop extends JFrame {
 	
 	public void paint(Graphics g) {
 		
+		paintClear(g);
+		
+		paintGrid(g);
+		paintPlayer(g);
+		paintPlayerSight(g);
+		
+	}
+	
+	public void paintGrid(Graphics g) {
+		g.setColor(Color.BLACK);
 		for (int i=0; i<mapMatrix.length; i++) {
 			for (int j=0; j<mapMatrix[i].length; j++) {
 				if (mapMatrix[i][j]==1) {
@@ -59,6 +79,21 @@ public class GameLoop extends JFrame {
 				}
 			}
 		}
+	}
+	
+	public void paintPlayer(Graphics g) {
+		g.setColor(Color.PINK);
+		g.fillOval((int)(playerX-0.5*playerWidth), (int)(playerY-0.5*playerWidth), playerWidth, playerWidth);
+	}
+	
+	public void paintPlayerSight(Graphics g) {
+		g.setColor(Color.WHITE);
+		g.drawLine(playerX, playerY, (int)(playerX+(Math.cos(playerAngle)*lineLength)), (int)(playerY+(Math.sin(playerAngle)*lineLength)));
+	}
+	
+	public void paintClear(Graphics g) {
+		g.setColor(Color.RED);
+		g.fillRect(0, 0, getWidth(), getHeight());
 	}
 
 	/**
