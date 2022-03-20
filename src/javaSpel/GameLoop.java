@@ -20,7 +20,7 @@ public class GameLoop extends JFrame {
 	
 	int framerate = 10;
 	
-	boolean drawTopDown = true;
+	boolean drawTopDown = false;
 	
 	int screenResX = 1600;
 	int screenResY = 800;
@@ -29,19 +29,20 @@ public class GameLoop extends JFrame {
 	int gameResY = 800;
 	
 	int[][] mapMatrix = {
-			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-			{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{1, 0, 0, 2, 0, 0, 2, 0, 0, 1},
-			{1, 0, 0, 2, 0, 0, 2, 0, 0, 1},
-			{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{1, 0, 3, 0, 0, 0, 0, 3, 0, 1},
-			{1, 0, 0, 3, 3, 3, 3, 0, 0, 1},
-			{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			{4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1},
+			{4, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1},
+			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+			{4, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+			{4, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0, 1, 1},
+			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+			{4, 0, 0, 1, 0, 1, 0, 2, 0, 1, 0, 1, 0, 1},
+			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+			{4, 0, 1, 0, 3, 0, 1, 0, 1, 0, 1, 0, 1, 1},
+			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+			{4, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 2, 0, 1},
+			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+			{4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1},
 	};
 	
 	int tileSize = 50;
@@ -66,11 +67,11 @@ public class GameLoop extends JFrame {
 	boolean movingUp = false;
 	boolean movingDown = false;
 	
-	int castLimit = 500;
-	double castIncrement = 0.05;
+	int castLimit = 2500;
+	double castIncrement = 0.01;
 	
 	double fov = 90;
-	int horizontalResolution = 200;
+	int horizontalResolution = 100;
 
 	/**
 	 * Launch the application.
@@ -116,14 +117,17 @@ public class GameLoop extends JFrame {
 			
 			switch (matrixValue) {
 				case 1:
-					g.setColor(Color.getHSBColor((float) 0.5, (float) 0.0, 20/(float) wallDistance));
+					g.setColor(Color.getHSBColor((float) 0.5, (float) 0.0, Math.min(20/(float) wallDistance,(float)1.0)));
 					break;
 				case 2:
-					g.setColor(Color.getHSBColor((float) 0, (float) 1.0, 100/(float) wallDistance));
-					wallCloseness = wallCloseness * 3 + 100;
+					g.setColor(Color.getHSBColor((float) 0, (float) 1.0, Math.min(100/(float) wallDistance,(float)1.0)));
+//					wallCloseness = wallCloseness * 3 + 100;
 					break;
 				case 3:
-					g.setColor(Color.getHSBColor((float) 0.186, (float) 1.0, 100/(float) wallDistance));
+					g.setColor(Color.getHSBColor((float) 0.186, (float) 1.0, Math.min(100/(float) wallDistance,(float)1.0)));
+					break;
+				case 4:
+					g.setColor(Color.getHSBColor((float) 0.8, (float) 1.0, Math.min(100/(float) wallDistance,(float)1.0)));
 					break;
 			}
 			
@@ -191,6 +195,18 @@ public class GameLoop extends JFrame {
 		}
 		if (e.getKeyChar() == 'd' && release) {
 			movingRight = false;
+		}
+		if (e.getKeyChar() == 'o' && !release) {
+			fov -= 3;
+		}
+		if (e.getKeyChar() == 'p' && !release) {
+			fov += 3;
+		}
+		if (e.getKeyChar() == 'k' && !release) {
+			horizontalResolution -= 10;
+		}
+		if (e.getKeyChar() == 'l' && !release) {
+			horizontalResolution += 10;
 		}
 	}
 	
