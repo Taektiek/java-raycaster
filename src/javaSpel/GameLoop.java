@@ -7,12 +7,16 @@ import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class GameLoop extends JFrame {
 
@@ -30,13 +34,13 @@ public class GameLoop extends JFrame {
 	
 	int[][] mapMatrix = {
 			{4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1},
-			{4, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1},
+			{4, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1},
 			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{4, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+			{4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1},
 			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{4, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0, 1, 1},
+			{4, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 0, 1, 1},
 			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{4, 0, 0, 1, 0, 1, 0, 2, 0, 1, 0, 1, 0, 1},
+			{4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1},
 			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 			{4, 0, 1, 0, 3, 0, 1, 0, 1, 0, 1, 0, 1, 1},
 			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -71,7 +75,12 @@ public class GameLoop extends JFrame {
 	double castIncrement = 0.01;
 	
 	double fov = 90;
-	int horizontalResolution = 100;
+	int horizontalResolution = 400;
+	
+	RaycastSprite basicKey;
+	
+	
+	boolean firstRender = true;
 
 	/**
 	 * Launch the application.
@@ -93,7 +102,21 @@ public class GameLoop extends JFrame {
 		
 		paintClear(g);
 		
+		paintRaycastRects(g);
+		
+		if (firstRender) {
+			
+			basicKey = new RaycastSprite(1050, 300, 20, "D:\\Data\\Programming\\java-raycaster\\sprites\\key.png");
+			
+		}
+		
+		firstRender = false;
+		
+		basicKey.renderSprite(g, this, playerX, playerY, playerAngle, fov);
+		
 		if (drawTopDown) {
+			g.setColor(Color.WHITE);
+			g.fillRect(800, 0, screenResX, screenResY);
 		
 			paintGrid(g);
 			paintPlayer(g);
@@ -104,6 +127,48 @@ public class GameLoop extends JFrame {
 				paintCastPoint(g, castCoords);
 			}
 		}
+		
+		
+		
+	}
+	
+	public void paintCastPoint(Graphics g, int[] coords) {
+		g.setColor(Color.RED);
+		g.fillOval(coords[0]-3, coords[1]-3, 6, 6);
+	}
+	
+	public void paintGrid(Graphics g) {
+		g.setColor(Color.BLACK);
+		for (int i=0; i<mapMatrix.length; i++) {
+			for (int j=0; j<mapMatrix[i].length; j++) {
+				if (mapMatrix[i][j]!=0) {
+					g.fillRect(tileStartX + j*tileSize, tileStartY + i*tileSize, tileSize, tileSize);
+				}
+			}
+		}
+	}
+	
+	public void paintPlayer(Graphics g) {
+		g.setColor(Color.PINK);
+		g.fillOval((int)(playerX-0.5*playerWidth), (int)(playerY-0.5*playerWidth), playerWidth, playerWidth);
+	}
+	
+	public void paintPlayerSight(Graphics g, double angle, int[] castCoords) {
+		g.setColor(Color.GRAY);
+		if (angle == playerAngle) {
+			g.setColor(Color.GREEN);
+		}
+		g.drawLine(playerX, playerY, castCoords[0], castCoords[1]);
+	}
+	
+	public void paintClear(Graphics g) {
+		g.setColor(Color.WHITE);
+		g.fillRect(0, 0, screenResX, screenResY);
+		g.setColor(Color.getHSBColor((float)0.08, (float)0.6, (float)0.4));
+		g.fillRect(0, gameResY/2, gameResX, gameResY/2);
+	}
+	
+	public void paintRaycastRects(Graphics g) {
 		for (int i = 0; i < horizontalResolution; i ++) {
 			double angleOffset = (i - (horizontalResolution / 2))*(fov/horizontalResolution);
 			int[] castCoords = cast(playerAngle + angleOffset);
@@ -136,39 +201,6 @@ public class GameLoop extends JFrame {
 			g.fillRect(i*rectWidth, (int)((gameResY-wallCloseness)/2), rectWidth, (int)wallCloseness);
 		}
 		
-	}
-	
-	public void paintCastPoint(Graphics g, int[] coords) {
-		g.setColor(Color.RED);
-		g.fillOval(coords[0]-3, coords[1]-3, 6, 6);
-	}
-	
-	public void paintGrid(Graphics g) {
-		g.setColor(Color.BLACK);
-		for (int i=0; i<mapMatrix.length; i++) {
-			for (int j=0; j<mapMatrix[i].length; j++) {
-				if (mapMatrix[i][j]!=0) {
-					g.fillRect(tileStartX + j*tileSize, tileStartY + i*tileSize, tileSize, tileSize);
-				}
-			}
-		}
-	}
-	
-	public void paintPlayer(Graphics g) {
-		g.setColor(Color.PINK);
-		g.fillOval((int)(playerX-0.5*playerWidth), (int)(playerY-0.5*playerWidth), playerWidth, playerWidth);
-	}
-	
-	public void paintPlayerSight(Graphics g, double angle, int[] castCoords) {
-		g.setColor(Color.GRAY);
-		g.drawLine(playerX, playerY, castCoords[0], castCoords[1]);
-	}
-	
-	public void paintClear(Graphics g) {
-		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, screenResX, screenResY);
-		g.setColor(Color.getHSBColor((float)0.08, (float)0.6, (float)0.4));
-		g.fillRect(0, gameResY/2, gameResX, gameResY/2);
 	}
 	
 	public void handleMovementKeys(KeyEvent e, boolean release) {
