@@ -11,8 +11,8 @@ import javax.imageio.ImageIO;
 
 public class RaycastSprite {
 	
-	private int x;
-	private int y;
+	int x;
+	int y;
 	private double size;
 	
 	private String imagePath;
@@ -47,7 +47,7 @@ public class RaycastSprite {
 		
 		g.fillRect(this.x, this.y, 10, 10);
 		
-		int width = (int)(10000/(Math.sqrt(Math.pow(Math.abs(this.x-playerX), 2)+Math.pow(Math.abs(this.y-playerY), 2))));
+		int width = (int)(size*10000/(Math.sqrt(Math.pow(Math.abs(this.x-playerX), 2)+Math.pow(Math.abs(this.y-playerY), 2))));
 		int height = width;
 		
 		g.drawImage(this.picture, (int)(screenPercentage*800-(0.5*width)), 400, width, height, observer);

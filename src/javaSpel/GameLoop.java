@@ -24,7 +24,7 @@ public class GameLoop extends JFrame {
 	
 	int framerate = 10;
 	
-	boolean drawTopDown = false;
+	boolean drawTopDown = true;
 	
 	int screenResX = 1600;
 	int screenResY = 800;
@@ -106,13 +106,30 @@ public class GameLoop extends JFrame {
 		
 		if (firstRender) {
 			
-			basicKey = new RaycastSprite(1050, 300, 20, "D:\\Data\\Programming\\java-raycaster\\sprites\\key.png");
+			basicKey = new RaycastSprite(1050, 300, 1, "D:\\Data\\Programming\\java-raycaster\\sprites\\key.png");
 			
 		}
 		
 		firstRender = false;
 		
-		basicKey.renderSprite(g, this, playerX, playerY, playerAngle, fov);
+		
+		double spriteAngle = Math.toDegrees(Math.atan((double)(basicKey.y-playerY)/(double)(basicKey.x-playerX)));
+		
+		int[] spriteCastCoords = cast(spriteAngle);
+		double spriteCastDistance = Math.sqrt(Math.pow(Math.abs(spriteCastCoords[0]-playerX),2)+Math.pow(Math.abs(spriteCastCoords[1]-playerY),2));
+		double spriteDistance = Math.sqrt(Math.pow(Math.abs(basicKey.x-playerX),2)+Math.pow(Math.abs(basicKey.y-playerY),2));
+
+		System.out.println();
+		System.out.println(spriteAngle);
+		System.out.println(spriteDistance);
+		System.out.println(spriteCastDistance);
+		
+		if (spriteCastDistance > spriteDistance) {
+			
+			basicKey.renderSprite(g, this, playerX, playerY, playerAngle, fov);
+			
+		}
+		
 		
 		if (drawTopDown) {
 			g.setColor(Color.WHITE);
@@ -169,6 +186,7 @@ public class GameLoop extends JFrame {
 	}
 	
 	public void paintRaycastRects(Graphics g) {
+		
 		for (int i = 0; i < horizontalResolution; i ++) {
 			double angleOffset = (i - (horizontalResolution / 2))*(fov/horizontalResolution);
 			int[] castCoords = cast(playerAngle + angleOffset);
@@ -186,7 +204,6 @@ public class GameLoop extends JFrame {
 					break;
 				case 2:
 					g.setColor(Color.getHSBColor((float) 0, (float) 1.0, Math.min(100/(float) wallDistance,(float)1.0)));
-//					wallCloseness = wallCloseness * 3 + 100;
 					break;
 				case 3:
 					g.setColor(Color.getHSBColor((float) 0.186, (float) 1.0, Math.min(100/(float) wallDistance,(float)1.0)));
