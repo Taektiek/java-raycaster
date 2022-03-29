@@ -28,6 +28,7 @@ public class RaycastSprite {
 		
 		this.imagePath = imagePath;
 		
+		// Read the image path from the file system
 		try {
 			this.picture = ImageIO.read(new File(this.imagePath));
 		} catch (IOException e) {
@@ -38,6 +39,7 @@ public class RaycastSprite {
 		
 	}
 	
+	// Draw the sprite at the location in screenspace
 	public void renderSprite(Graphics g, ImageObserver observer, int playerX, int playerY, double playerAngle, double fov) {
 		
 		
@@ -54,6 +56,7 @@ public class RaycastSprite {
 		
 	}
 	
+	// Converts the location of the sprite in the grid to the position it should have on the screen
 	private double toScreenPercentage(int playerX, int playerY, double playerAngle, double fov) {
 		
 		double tan;
