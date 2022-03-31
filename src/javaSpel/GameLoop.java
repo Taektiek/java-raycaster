@@ -24,7 +24,7 @@ public class GameLoop extends JFrame {
 	
 	int framerate = 10;
 	
-	boolean drawTopDown = true;
+	boolean drawTopDown = false;
 	
 	int screenResX = 1600;
 	int screenResY = 800;
@@ -32,22 +32,9 @@ public class GameLoop extends JFrame {
 	int gameResX = 800;
 	int gameResY = 800;
 	
-	int[][] mapMatrix = {
-			{4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1},
-			{4, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1},
-			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1},
-			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{4, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 0, 1, 1},
-			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1},
-			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{4, 0, 1, 0, 3, 0, 1, 0, 1, 0, 1, 0, 1, 1},
-			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{4, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 2, 0, 1},
-			{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-			{4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1},
-	};
+	mazeGenerator maze = new mazeGenerator();
+	
+	int[][] mapMatrix = new int[mazeGenerator.height*2+1][mazeGenerator.width*2+1];
 	
 	int tileSize = 50;
 	
@@ -101,36 +88,45 @@ public class GameLoop extends JFrame {
 	
 	public void paint(Graphics g) {
 		
+
+		// Create RaycastSprites when first render
+		if (firstRender) {
+			
+//			basicKey = new RaycastSprite(1050, 300, 1, "D:\\Data\\Programming\\java-raycaster\\sprites\\key.png");
+//			guy = new RaycastSprite(1200, 350, 1, "D:\\Data\\Programming\\java-raycaster\\sprites\\guy.png");
+			
+			maze.generate();
+			mapMatrix = maze.getMatrix();
+			
+		}
+		
 		paintClear(g);
 		
 		paintRaycastRects(g);
 		
-		// Create RaycastSprites when first render
-		if (firstRender) {
-			
-			basicKey = new RaycastSprite(1050, 300, 1, "D:\\Data\\Programming\\java-raycaster\\sprites\\key.png");
-			guy = new RaycastSprite(1200, 350, 1, "D:\\Data\\Programming\\java-raycaster\\sprites\\guy.png");
-			
-		}
 		firstRender = false;
 		
 		
 		// Compare distance between player and RaycastSprite to distance between the wall in the direction of the RaycastSprite and the player
 		
-		double spriteAngle = Math.toDegrees(Math.atan((double)(basicKey.y-playerY)/(double)(basicKey.x-playerX)));
-		
-		int[] spriteCastCoords = cast(spriteAngle);
-		double spriteCastDistance = Math.sqrt(Math.pow(Math.abs(spriteCastCoords[0]-playerX),2)+Math.pow(Math.abs(spriteCastCoords[1]-playerY),2));
-		double spriteDistance = Math.sqrt(Math.pow(Math.abs(basicKey.x-playerX),2)+Math.pow(Math.abs(basicKey.y-playerY),2));
-		
-		if (spriteCastDistance > spriteDistance) {
-			
-			basicKey.renderSprite(g, this, playerX, playerY, playerAngle, fov);
-			
-		}
-		
-
-		guy.renderSprite(g, this, playerX, playerY, playerAngle, fov);
+//		double spriteAngle = Math.toDegrees(Math.atan((double)(basicKey.y-playerY)/(double)(basicKey.x-playerX)));
+//		
+//		int[] spriteCastCoords = cast(spriteAngle);
+//		double spriteCastDistance = Math.sqrt(Math.pow(Math.abs(spriteCastCoords[0]-playerX),2)+Math.pow(Math.abs(spriteCastCoords[1]-playerY),2));
+//		double spriteDistance = Math.sqrt(Math.pow(Math.abs(basicKey.x-playerX),2)+Math.pow(Math.abs(basicKey.y-playerY),2));
+//		
+//		if (spriteCastDistance > spriteDistance) {
+//			
+//			basicKey.renderSprite(g, this, playerX, playerY, playerAngle, fov);
+//			
+//		}
+//		
+//		if (spriteDistance < 30) {
+//			basicKey.show = false;
+//		}
+//		
+//
+//		guy.renderSprite(g, this, playerX, playerY, playerAngle, fov);
 		
 		
 		// When drawTopDown draw the grid to the right side of the window for the purpose of demonstration
@@ -188,7 +184,7 @@ public class GameLoop extends JFrame {
 	
 	// Resets screen after every frame
 	public void paintClear(Graphics g) {
-		g.setColor(Color.WHITE);
+		g.setColor(Color.BLUE);
 		g.fillRect(0, 0, screenResX, screenResY);
 		g.setColor(Color.getHSBColor((float)0.08, (float)0.6, (float)0.4));
 		g.fillRect(0, gameResY/2, gameResX, gameResY/2);

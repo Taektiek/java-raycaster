@@ -15,6 +15,8 @@ public class RaycastSprite {
 	int y;
 	private double size;
 	
+	boolean show = true;
+	
 	private String imagePath;
 	
 	private BufferedImage picture;
@@ -42,18 +44,20 @@ public class RaycastSprite {
 	// Draw the sprite at the location in screenspace
 	public void renderSprite(Graphics g, ImageObserver observer, int playerX, int playerY, double playerAngle, double fov) {
 		
-		
-		double screenPercentage = toScreenPercentage(playerX, playerY, playerAngle, fov);
-		
-		g.setColor(Color.CYAN);
-		
-		g.fillRect(this.x, this.y, 10, 10);
-		
-		int width = (int)(size*10000/(Math.sqrt(Math.pow(Math.abs(this.x-playerX), 2)+Math.pow(Math.abs(this.y-playerY), 2))));
-		int height = width;
-		
-		g.drawImage(this.picture, (int)(screenPercentage*800-(0.5*width)), 400, width, height, observer);
-		
+		if (show) {
+			
+			double screenPercentage = toScreenPercentage(playerX, playerY, playerAngle, fov);
+			
+			g.setColor(Color.CYAN);
+			
+			g.fillRect(this.x, this.y, 10, 10);
+			
+			int width = (int)(size*10000/(Math.sqrt(Math.pow(Math.abs(this.x-playerX), 2)+Math.pow(Math.abs(this.y-playerY), 2))));
+			int height = width;
+			
+			g.drawImage(this.picture, (int)(screenPercentage*800-(0.5*width)), 400, width, height, observer);
+			
+		}
 	}
 	
 	// Converts the location of the sprite in the grid to the position it should have on the screen
