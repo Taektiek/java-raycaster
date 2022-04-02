@@ -17,6 +17,13 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import java.awt.Font;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+import java.awt.SystemColor;
 
 public class GameLoop extends JFrame {
 
@@ -31,6 +38,8 @@ public class GameLoop extends JFrame {
 	
 	int gameResX = 800;
 	int gameResY = 800;
+	
+	int frameCounter = 0;
 	
 	mazeGenerator maze = new mazeGenerator();
 	
@@ -69,6 +78,9 @@ public class GameLoop extends JFrame {
 	
 	
 	boolean firstRender = true;
+	private JTextField Txtwelcoming;
+	private JTextField txtKiesHierJe;
+	private JTextField txtGoedGedaan;
 
 	/**
 	 * Launch the application.
@@ -97,14 +109,16 @@ public class GameLoop extends JFrame {
 			
 			maze.generate();
 			mapMatrix = maze.getMatrix();
-			
+			firstRender = false;
+			return;
 		}
-		
+		else if (frameCounter > 2) {
+			
 		paintClear(g);
 		
 		paintRaycastRects(g);
+			
 		
-		firstRender = false;
 		
 		
 		// Compare distance between player and RaycastSprite to distance between the wall in the direction of the RaycastSprite and the player
@@ -144,8 +158,8 @@ public class GameLoop extends JFrame {
 				paintCastPoint(g, castCoords);
 			}
 		}
-		
-		
+		}
+		frameCounter++;
 		
 	}
 	
@@ -165,6 +179,7 @@ public class GameLoop extends JFrame {
 				}
 			}
 		}
+		
 	}
 	
 	// Paints player representation
@@ -266,6 +281,7 @@ public class GameLoop extends JFrame {
 		if (e.getKeyChar() == 'l' && !release) {
 			horizontalResolution += 10;
 		}
+
 	}
 	
 	// Moves the player based on the values assigned in handleMovementKeys()
@@ -341,9 +357,19 @@ public class GameLoop extends JFrame {
 			setBounds(0, 0, screenResX/2, screenResY);
 		}
 		contentPane = new JPanel();
+		contentPane.setBackground(UIManager.getColor("Panel.background"));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JPanel startPanel = new JPanel();
+		startPanel.setForeground(UIManager.getColor("Panel.background"));
+		startPanel.setBackground(UIManager.getColor("Panel.background"));
+		startPanel.setBounds(10, 10, 853, 704);
+		contentPane.add(startPanel);
+		startPanel.setLayout(null);
+		startPanel.setVisible (true);
+		
 		
 		// Create and start frame loop timer.
 		final Timer t = new Timer(1000/framerate, new ActionListener() {
@@ -353,9 +379,94 @@ public class GameLoop extends JFrame {
 				repaint();
 			}
 		});
+		JButton btnEasy = new JButton("Langster");
+		btnEasy.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				startPanel.setVisible(false);
+				t.start();
+				revalidate();
+				requestFocus();
+					
+			}
+		});
 		
-		t.start();
+		JPanel PanelEind = new JPanel();
+		PanelEind.setBounds(10, 10, 738, 626);
+		startPanel.add(PanelEind);
+		PanelEind.setLayout(null);
+		PanelEind.setVisible(false);
+		
+		txtGoedGedaan = new JTextField();
+		txtGoedGedaan.setFont(new Font("Rockwell", Font.PLAIN, 28));
+		txtGoedGedaan.setText("Goed gedaan");
+		txtGoedGedaan.setHorizontalAlignment(SwingConstants.CENTER);
+		txtGoedGedaan.setBounds(232, 154, 299, 81);
+		PanelEind.add(txtGoedGedaan);
+		txtGoedGedaan.setColumns(10);
+		
+		JButton btnOpnieuw = new JButton("Begin opnieuw");
+		btnOpnieuw.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				PanelEind.setVisible(false);
+				startPanel.setVisible(true);
+			}
+		});
+		btnOpnieuw.setBounds(232, 314, 299, 57);
+		PanelEind.add(btnOpnieuw);
+		btnEasy.setFont(new Font("Rockwell", Font.PLAIN, 28));
+		btnEasy.setBackground(new Color(30, 144, 255));
+		btnEasy.setBounds(110, 245, 556, 105);
+		startPanel.add(btnEasy);
+		
+		JButton Btngemiddeld = new JButton("Gemiddeld");
+		Btngemiddeld.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				startPanel.setVisible(false);
+				t.start();
+				revalidate();
+				requestFocus();
+			}
+		});
+		Btngemiddeld.setFont(new Font("Rockwell", Font.PLAIN, 28));
+		Btngemiddeld.setBackground(new Color(60, 179, 113));
+		Btngemiddeld.setBounds(110, 407, 556, 109);
+		startPanel.add(Btngemiddeld);
+		
+		JButton BtnMoeilijk = new JButton("Gangster");
+		BtnMoeilijk.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				startPanel.setVisible(false);
+				t.start();
+				revalidate();
+				requestFocus();
+			}
+		});
+		BtnMoeilijk.setFont(new Font("Rockwell", Font.PLAIN, 28));
+		BtnMoeilijk.setBackground(new Color(178, 34, 34));
+		BtnMoeilijk.setBounds(110, 569, 556, 109);
+		startPanel.add(BtnMoeilijk);
+		
+		Txtwelcoming = new JTextField();
+		Txtwelcoming.setFont(new Font("Rockwell", Font.PLAIN, 28));
+		Txtwelcoming.setText("Welkom ");
+		Txtwelcoming.setHorizontalAlignment(SwingConstants.CENTER);
+		Txtwelcoming.setBackground(UIManager.getColor("Panel.background"));
+		Txtwelcoming.setBounds(145, 36, 494, 68);
+		startPanel.add(Txtwelcoming);
+		Txtwelcoming.setColumns(10);
+		
+		txtKiesHierJe = new JTextField();
+		txtKiesHierJe.setText("Kies hier je moeilijkheidsgraad");
+		txtKiesHierJe.setHorizontalAlignment(SwingConstants.CENTER);
+		txtKiesHierJe.setFont(new Font("Rockwell", Font.PLAIN, 28));
+		txtKiesHierJe.setColumns(10);
+		txtKiesHierJe.setBackground(SystemColor.menu);
+		txtKiesHierJe.setBounds(145, 129, 494, 68);
+		startPanel.add(txtKiesHierJe);
+		
+		
+		
 		
 	}
-
 }
