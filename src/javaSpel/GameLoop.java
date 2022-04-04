@@ -24,6 +24,7 @@ import java.awt.Font;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import java.awt.SystemColor;
+import javax.swing.JTabbedPane;
 
 public class GameLoop extends JFrame {
 
@@ -41,9 +42,12 @@ public class GameLoop extends JFrame {
 	
 	int frameCounter = 0;
 	
-	mazeGenerator maze = new mazeGenerator();
+	int mazeWidth = 1000;
+	int mazeHeight = 1000;
 	
-	int[][] mapMatrix = new int[mazeGenerator.height*2+1][mazeGenerator.width*2+1];
+	mazeGenerator maze = new mazeGenerator(mazeWidth, mazeHeight);
+	
+	int[][] mapMatrix = new int[maze.height*2+1][maze.width*2+1];
 	
 	int tileSize = 50;
 	
@@ -73,14 +77,18 @@ public class GameLoop extends JFrame {
 	double fov = 90;
 	int horizontalResolution = 400;
 	
-	RaycastSprite basicKey;
-	RaycastSprite guy;
+	RaycastSprite flag;
 	
 	
 	boolean firstRender = true;
 	private JTextField Txtwelcoming;
 	private JTextField txtKiesHierJe;
 	private JTextField txtGoedGedaan;
+	
+	Timer t;
+	JPanel eindMenu;
+	JPanel menuPanel;
+	JPanel startMenu;
 
 	/**
 	 * Launch the application.
@@ -104,60 +112,55 @@ public class GameLoop extends JFrame {
 		// Create RaycastSprites when first render
 		if (firstRender) {
 			
-//			basicKey = new RaycastSprite(1050, 300, 1, "D:\\Data\\Programming\\java-raycaster\\sprites\\key.png");
-//			guy = new RaycastSprite(1200, 350, 1, "D:\\Data\\Programming\\java-raycaster\\sprites\\guy.png");
-			
-			maze.generate();
-			mapMatrix = maze.getMatrix();
+			flag = new RaycastSprite(1050, 300, 2, "D:\\Data\\Programming\\java-raycaster\\sprites\\flag.png");		
+
 			firstRender = false;
+			
 			return;
 		}
 		else if (frameCounter > 2) {
 			
-		paintClear(g);
-		
-		paintRaycastRects(g);
+			paintClear(g);
 			
-		
-		
-		
-		// Compare distance between player and RaycastSprite to distance between the wall in the direction of the RaycastSprite and the player
-		
-//		double spriteAngle = Math.toDegrees(Math.atan((double)(basicKey.y-playerY)/(double)(basicKey.x-playerX)));
-//		
-//		int[] spriteCastCoords = cast(spriteAngle);
-//		double spriteCastDistance = Math.sqrt(Math.pow(Math.abs(spriteCastCoords[0]-playerX),2)+Math.pow(Math.abs(spriteCastCoords[1]-playerY),2));
-//		double spriteDistance = Math.sqrt(Math.pow(Math.abs(basicKey.x-playerX),2)+Math.pow(Math.abs(basicKey.y-playerY),2));
-//		
-//		if (spriteCastDistance > spriteDistance) {
-//			
-//			basicKey.renderSprite(g, this, playerX, playerY, playerAngle, fov);
-//			
-//		}
-//		
-//		if (spriteDistance < 30) {
-//			basicKey.show = false;
-//		}
-//		
-//
-//		guy.renderSprite(g, this, playerX, playerY, playerAngle, fov);
-		
-		
-		// When drawTopDown draw the grid to the right side of the window for the purpose of demonstration
-		
-		if (drawTopDown) {
-		
-			paintGrid(g);
-			paintPlayer(g);
+			paintRaycastRects(g);
 			
-			// Draw every line of sight of the player
-			for (int i = 0; i < horizontalResolution; i ++) {
-				double angleOffset = (i - (horizontalResolution / 2))*(fov/horizontalResolution);
-				int[] castCoords = cast(playerAngle + angleOffset);
-				paintPlayerSight(g, playerAngle + angleOffset, castCoords);
-				paintCastPoint(g, castCoords);
+			// Compare distance between player and RaycastSprite to distance between the wall in the direction of the RaycastSprite and the player
+			
+			double spriteAngle = Math.toDegrees(Math.atan((double)(flag.y-playerY)/(double)(flag.x-playerX)));
+			
+			int[] spriteCastCoords = cast(spriteAngle);
+			double spriteCastDistance = Math.sqrt(Math.pow(Math.abs(spriteCastCoords[0]-playerX),2)+Math.pow(Math.abs(spriteCastCoords[1]-playerY),2));
+			double spriteDistance = Math.sqrt(Math.pow(Math.abs(flag.x-playerX),2)+Math.pow(Math.abs(flag.y-playerY),2));
+			
+			if (spriteCastDistance > spriteDistance) {
+				
+				flag.renderSprite(g, this, playerX, playerY, playerAngle, fov);
+				
 			}
-		}
+			
+			if (spriteDistance < 30) {
+				flag.show = false;
+				t.stop();
+				menuPanel.setVisible(true);
+				eindMenu.setVisible(true);
+			}
+			
+			
+			// When drawTopDown draw the grid to the right side of the window for the purpose of demonstration
+			
+			if (drawTopDown) {
+			
+				paintGrid(g);
+				paintPlayer(g);
+				
+				// Draw every line of sight of the player
+				for (int i = 0; i < horizontalResolution; i ++) {
+					double angleOffset = (i - (horizontalResolution / 2))*(fov/horizontalResolution);
+					int[] castCoords = cast(playerAngle + angleOffset);
+					paintPlayerSight(g, playerAngle + angleOffset, castCoords);
+					paintCastPoint(g, castCoords);
+				}
+			}
 		}
 		frameCounter++;
 		
@@ -362,108 +365,146 @@ public class GameLoop extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JPanel startPanel = new JPanel();
-		startPanel.setForeground(UIManager.getColor("Panel.background"));
-		startPanel.setBackground(UIManager.getColor("Panel.background"));
-		startPanel.setBounds(10, 10, 853, 704);
-		contentPane.add(startPanel);
-		startPanel.setLayout(null);
-		startPanel.setVisible (true);
+		menuPanel = new JPanel();
+		menuPanel.setForeground(UIManager.getColor("Panel.background"));
+		menuPanel.setBackground(UIManager.getColor("Panel.background"));
+		menuPanel.setBounds(0, 0, 1600, 800);
+		contentPane.add(menuPanel);
+		menuPanel.setLayout(null);
+		menuPanel.setVisible (true);
 		
 		
 		// Create and start frame loop timer.
-		final Timer t = new Timer(1000/framerate, new ActionListener() {
+		t = new Timer(1000/framerate, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				movePlayer();
 				repaint();
 			}
 		});
-		JButton btnEasy = new JButton("Langster");
-		btnEasy.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				startPanel.setVisible(false);
-				t.start();
-				revalidate();
-				requestFocus();
-					
-			}
-		});
 		
-		JPanel PanelEind = new JPanel();
-		PanelEind.setBounds(10, 10, 738, 626);
-		startPanel.add(PanelEind);
-		PanelEind.setLayout(null);
-		PanelEind.setVisible(false);
+		eindMenu = new JPanel();
+		eindMenu.setBounds(0, 0, 800, 800);
+		menuPanel.add(eindMenu);
+		eindMenu.setLayout(null);
+		eindMenu.setVisible(false);
 		
 		txtGoedGedaan = new JTextField();
 		txtGoedGedaan.setFont(new Font("Rockwell", Font.PLAIN, 28));
 		txtGoedGedaan.setText("Goed gedaan");
 		txtGoedGedaan.setHorizontalAlignment(SwingConstants.CENTER);
-		txtGoedGedaan.setBounds(232, 154, 299, 81);
-		PanelEind.add(txtGoedGedaan);
+		txtGoedGedaan.setBounds(250, 128, 299, 81);
+		eindMenu.add(txtGoedGedaan);
 		txtGoedGedaan.setColumns(10);
 		
 		JButton btnOpnieuw = new JButton("Begin opnieuw");
 		btnOpnieuw.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				PanelEind.setVisible(false);
-				startPanel.setVisible(true);
+				eindMenu.setVisible(false);
+				startMenu.setVisible(true);
 			}
 		});
-		btnOpnieuw.setBounds(232, 314, 299, 57);
-		PanelEind.add(btnOpnieuw);
-		btnEasy.setFont(new Font("Rockwell", Font.PLAIN, 28));
-		btnEasy.setBackground(new Color(30, 144, 255));
-		btnEasy.setBounds(110, 245, 556, 105);
-		startPanel.add(btnEasy);
+		btnOpnieuw.setBounds(250, 301, 299, 57);
+		eindMenu.add(btnOpnieuw);
 		
-		JButton Btngemiddeld = new JButton("Gemiddeld");
-		Btngemiddeld.addActionListener(new ActionListener() {
+		startMenu = new JPanel();
+		startMenu.setBounds(0, 0, 800, 800);
+		menuPanel.add(startMenu);
+		startMenu.setLayout(null);
+		JButton btnEasy = new JButton("Langster");
+		btnEasy.setBounds(122, 209, 556, 105);
+		startMenu.add(btnEasy);
+		btnEasy.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				startPanel.setVisible(false);
+				menuPanel.setVisible(false);
+				startMenu.setVisible(false);
+				playerX = 975;
+				playerY = 175;
+				flag.show = true;
 				t.start();
 				revalidate();
 				requestFocus();
+				maze.width = 5;
+				maze.height = 5;
+				flag.x = tileStartX + (int)(((double)(maze.width)*2-0.5)*tileSize);
+				flag.y = tileStartY + (int)(((double)(maze.height)*2-0.5)*tileSize);
+				mapMatrix = new int[maze.height*2+1][maze.width*2+1];
+				maze.generate();
+				mapMatrix = maze.getMatrix();
+					
+			}
+		});
+		btnEasy.setFont(new Font("Rockwell", Font.PLAIN, 28));
+		btnEasy.setBackground(new Color(30, 144, 255));
+		
+		JButton Btngemiddeld = new JButton("Gemiddeld");
+		Btngemiddeld.setBounds(122, 371, 556, 109);
+		startMenu.add(Btngemiddeld);
+		Btngemiddeld.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				menuPanel.setVisible(false);
+				startMenu.setVisible(false);
+				playerX = 975;
+				playerY = 175;
+				flag.show = true;
+				t.start();
+				revalidate();
+				requestFocus();
+				maze.width = 10;
+				maze.height = 10;
+				flag.x = tileStartX + (int)(((double)(maze.width)*2-0.5)*tileSize);
+				flag.y = tileStartY + (int)(((double)(maze.height)*2-0.5)*tileSize);
+				mapMatrix = new int[maze.height*2+1][maze.width*2+1];
+				maze.generate();
+				mapMatrix = maze.getMatrix();
 			}
 		});
 		Btngemiddeld.setFont(new Font("Rockwell", Font.PLAIN, 28));
 		Btngemiddeld.setBackground(new Color(60, 179, 113));
-		Btngemiddeld.setBounds(110, 407, 556, 109);
-		startPanel.add(Btngemiddeld);
 		
 		JButton BtnMoeilijk = new JButton("Gangster");
+		BtnMoeilijk.setBounds(122, 533, 556, 109);
+		startMenu.add(BtnMoeilijk);
 		BtnMoeilijk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				startPanel.setVisible(false);
+				menuPanel.setVisible(false);
+				startMenu.setVisible(false);
+				playerX = 975;
+				playerY = 175;
+				flag.show = true;
 				t.start();
 				revalidate();
 				requestFocus();
+				maze.width = 15;
+				maze.height = 15;
+				flag.x = tileStartX + (int)(((double)(maze.width)*2-0.5)*tileSize);
+				flag.y = tileStartY + (int)(((double)(maze.height)*2-0.5)*tileSize);
+				mapMatrix = new int[maze.height*2+1][maze.width*2+1];
+				maze.generate();
+				mapMatrix = maze.getMatrix();
 			}
 		});
 		BtnMoeilijk.setFont(new Font("Rockwell", Font.PLAIN, 28));
 		BtnMoeilijk.setBackground(new Color(178, 34, 34));
-		BtnMoeilijk.setBounds(110, 569, 556, 109);
-		startPanel.add(BtnMoeilijk);
 		
 		Txtwelcoming = new JTextField();
+		Txtwelcoming.setBounds(153, 0, 494, 68);
+		startMenu.add(Txtwelcoming);
 		Txtwelcoming.setFont(new Font("Rockwell", Font.PLAIN, 28));
 		Txtwelcoming.setText("Welkom ");
 		Txtwelcoming.setHorizontalAlignment(SwingConstants.CENTER);
 		Txtwelcoming.setBackground(UIManager.getColor("Panel.background"));
-		Txtwelcoming.setBounds(145, 36, 494, 68);
-		startPanel.add(Txtwelcoming);
 		Txtwelcoming.setColumns(10);
 		
 		txtKiesHierJe = new JTextField();
+		txtKiesHierJe.setBounds(153, 93, 494, 68);
+		startMenu.add(txtKiesHierJe);
 		txtKiesHierJe.setText("Kies hier je moeilijkheidsgraad");
 		txtKiesHierJe.setHorizontalAlignment(SwingConstants.CENTER);
 		txtKiesHierJe.setFont(new Font("Rockwell", Font.PLAIN, 28));
 		txtKiesHierJe.setColumns(10);
 		txtKiesHierJe.setBackground(SystemColor.menu);
-		txtKiesHierJe.setBounds(145, 129, 494, 68);
-		startPanel.add(txtKiesHierJe);
+		
 		
 		
 		

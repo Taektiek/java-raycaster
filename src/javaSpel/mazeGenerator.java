@@ -4,16 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
 public class mazeGenerator {
 
-	static final int width = 10;
-	static final int height = 10;
-	
+	int width;
+	int height;
 	
 	private static final Random rand = new Random();
 	
-	int [][] mazeMatrix = new int[height * 2 + 1][width * 2 + 1];
+	int [][] mazeMatrix;
+
+	public mazeGenerator(int width, int height) {
+		this.width = width;
+		this.height = height;
+		
+		this.mazeMatrix = new int[height * 2 + 1][width * 2 + 1];
+	}
 	
 	public void generate() {
 		List<Integer> visited = new ArrayList<>();
@@ -70,27 +75,16 @@ public class mazeGenerator {
 			continue;
 		}
 		
-		switch(nextPath.end-nextPath.start) {
-		case 1:		// naar rechts
+		int pathDifference = nextPath.end-nextPath.start;
+		
+		if (pathDifference == 1) { // Rechts
 			mazeMatrix[(int)( nextPath.start / width) * 2 + 1][(nextPath.start % width + 1) * 2] = 0;
-			break;
-			
-			
-		case -1:	// naar links
-			if(nextPath.start % width == 1) {
-				break;
-			}
+		} else if (pathDifference == -1) { // Links
 			mazeMatrix[(int)( nextPath.start / width) * 2 + 1][(nextPath.start % width - 1) * 2] = 0;
-					
-				break;
-			
-		case width: // naar beneden
+		} else if (pathDifference == width) { // Onder
 			mazeMatrix[(int)( nextPath.start / width) * 2 + 2][(nextPath.start % width) * 2 + 1] = 0;
-			break;
-			
-		case -width: // naar boven
+		} else if (pathDifference == -width) { // Boven
 			mazeMatrix[(int)( nextPath.start / width) * 2][(nextPath.start % width) * 2 + 1] = 0;
-			break;
 		}
 		
 		visited.add(nextPath.end);
